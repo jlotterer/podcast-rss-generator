@@ -1,0 +1,23 @@
+{
+  "name": "automated-podcast-rss",
+  "version": "1.0.0",
+  "description": "Automated podcast RSS generator with Google Drive integration",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "googleapis": "^128.0.0",
+    "lucide-react": "^0.263.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.0.0"
+  }
+}

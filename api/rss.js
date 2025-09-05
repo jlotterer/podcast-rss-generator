@@ -1,0 +1,146 @@
+// api/rss.js - Vercel serverless function
+const { google } = require('googleapis');
+
+export default async function handler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    // Set up Google Drive API
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        type: 'service_account',
+        project_id: process.env.GOOGLE_PROJECT_ID,
+        private_key_id: process.env.GOOGLE_PRIVATE_KEY_ID,
+        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+        token_uri: 'https://oauth2.googleapis.com/token',
+        auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+        client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.GOOGLE_CLIENT_EMAIL}`
+      },
+      scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+    });
+
+    const drive = google.drive({ version: 'v3', auth });
+    
+    // Get folder ID from query params or environment
+    const folderId = req.query.folder || process.env.GOOGLE_DRIVE_FOLDER_ID;
+    
+    if (!folderId) {
+      return res.status(400).json({ error: 'Folder ID required' });
+    }
+
+    // Get all audio files from the specified folder
+    const response = await drive.files.list({
+      q: `'${folderId}' in parents and (mimeType='audio/mpeg' or mimeType='audio/mp3' or mimeType='audio/wav' or mimeType='audio/ogg' or name contains '.mp3' or name contains '.wav' or name contains '.m4a')`,
+      fields: 'files(id, name, size, createdTime, modifiedTime, webContentLink)',
+      orderBy: 'createdTime desc'
+    });
+
+    const audioFiles = response.data.files;
+    
+    // Generate episode data
+    const episodes = audioFiles.map((file, index) => {
+      // Create public download URL
+      const downloadUrl = `https://drive.google.com/uc?id=${file.id}&export=download`;
+      
+      // Extract title from filename (remove extension)
+      const title = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+      
+      // Generate description from title
+      const description = `Episode about ${title.toLowerCase()}`;
+      
+      return {
+        id: file.id,
+        title: title,
+        description: description,
+        audioUrl: downloadUrl,
+        publishDate: new Date(file.createdTime),
+        fileSize: file.size ? Math.round(file.size / (1024 * 1024) * 10) / 10 + ' MB' : 'Unknown',
+        duration: '00:00' // You'd need to analyze the audio file to get actual duration
+      };
+    });
+
+    // Podcast metadata (you can store this in environment variables or a database)
+    const podcastMeta = {
+      title: process.env.PODCAST_TITLE || 'My NotebookLM Podcast',
+      description: process.env.PODCAST_DESCRIPTION || 'AI-generated podcasts from my research',
+      author: process.env.PODCAST_AUTHOR || 'Podcast Author',
+      email: process.env.PODCAST_EMAIL || 'author@example.com',
+      websiteUrl: process.env.PODCAST_WEBSITE || 'https://example.com',
+      imageUrl: process.env.PODCAST_IMAGE || ''
+    };
+
+    // Generate RSS XML
+    const rssXml = generateRSSXML(podcastMeta, episodes);
+    
+    // Set headers for RSS feed
+    res.setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+    
+    return res.status(200).send(rssXml);
+    
+  } catch (error) {
+    console.error('Error generating RSS feed:', error);
+    return res.status(500).json({ 
+      error: 'Failed to generate RSS feed',
+      details: error.message 
+    });
+  }
+}
+
+function generateRSSXML(podcastMeta, episodes) {
+  const { title, description, author, email, websiteUrl, imageUrl } = podcastMeta;
+  
+  const episodeItems = episodes.map(episode => `
+    <item>
+      <title><![CDATA[${episode.title}]]></title>
+      <description><![CDATA[${episode.description}]]></description>
+      <link>${websiteUrl}</link>
+      <guid isPermaLink="false">${episode.id}</guid>
+      <pubDate>${episode.publishDate.toUTCString()}</pubDate>
+      <enclosure url="${episode.audioUrl}" type="audio/mpeg" length="0"/>
+      <itunes:duration>${episode.duration}</itunes:duration>
+      <itunes:explicit>clean</itunes:explicit>
+    </item>`).join('');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" 
+     xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title><![CDATA[${title}]]></title>
+    <description><![CDATA[${description}]]></description>
+    <link>${websiteUrl}</link>
+    <language>en</language>
+    <copyright>© ${new Date().getFullYear()} ${author}</copyright>
+    <managingEditor>${email} (${author})</managingEditor>
+    <webMaster>${email} (${author})</webMaster>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <generator>Automated Podcast RSS Generator</generator>
+    <docs>https://cyber.harvard.edu/rss/rss.html</docs>
+    <ttl>60</ttl>
+    ${imageUrl ? `
+    <image>
+      <url>${imageUrl}</url>
+      <title><![CDATA[${title}]]></title>
+      <link>${websiteUrl}</link>
+    </image>
+    <itunes:image href="${imageUrl}"/>` : ''}
+    <itunes:category text="Technology">
+      <itunes:category text="Artificial Intelligence"/>
+    </itunes:category>
+    <itunes:explicit>clean</itunes:explicit>
+    <itunes:author>${author}</itunes:author>
+    <itunes:summary><![CDATA[${description}]]></itunes:summary>
+    <itunes:owner>
+      <itunes:name>${author}</itunes:name>
+      <itunes:email>${email}</itunes:email>
+    </itunes:owner>
+    <itunes:type>episodic</itunes:type>${episodeItems}
+  </channel>
+</rss>`;
+}
