@@ -40,23 +40,26 @@ export default async function handler(req, res) {
       };
     });
 
-    // Use a canonical public URL from environment variables for the RSS feed.
+    // Determine the base URL for all links in the feed.
+    // Use a canonical public URL from environment variables, which is critical for Vercel deployments.
     // Fallback to the request's host for local development.
-    const websiteUrl = process.env.PODCAST_PUBLIC_URL || `https://${req.headers.host}`;
+    let baseUrl = process.env.PODCAST_PUBLIC_URL || process.env.PODCAST_WEBSITE || `https://${req.headers.host}`;
+    // Clean up trailing slashes from the base URL to prevent double slashes.
+    baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 
     let imageUrl = process.env.PODCAST_IMAGE || '';
     // If the image URL is a local path (e.g., /api/cover), make it absolute.
     if (imageUrl && imageUrl.startsWith('/')) {
-      imageUrl = `${websiteUrl}${imageUrl}`;
+      imageUrl = `${baseUrl}${imageUrl}`;
     }
 
     // Podcast metadata from environment variables
     const podcastMeta = {
+      baseUrl: baseUrl, // Pass the calculated base URL to the XML generator
       title: process.env.PODCAST_TITLE || 'My NotebookLM Podcast',
       description: process.env.PODCAST_DESCRIPTION || 'AI-generated podcasts from my research',
       author: process.env.PODCAST_AUTHOR || 'Podcast Author',
       email: process.env.PODCAST_EMAIL || 'author@example.com',
-      websiteUrl: websiteUrl,
       imageUrl: imageUrl,
     };
 
@@ -85,17 +88,17 @@ export default async function handler(req, res) {
 }
 
 function generateRSSXML(podcastMeta, episodes) {
-  const { title, description, author, email, websiteUrl, imageUrl } = podcastMeta;
+  const { baseUrl, title, description, author, email, imageUrl } = podcastMeta;
   
   const episodeItems = episodes.map(episode => {
-    // Use the new proxy URL
-    const safeAudioUrl = `${websiteUrl}/api/play?fileId=${episode.id}`;
+    // Construct the absolute URL for the audio file using the base URL.
+    const safeAudioUrl = `${baseUrl}/api/play?fileId=${episode.id}`;
 
     return `
     <item>
       <title><![CDATA[${episode.title}]]></title>
       <description><![CDATA[${episode.description}]]></description>
-      <link>${websiteUrl}</link>
+      <link>${baseUrl}</link>
       <guid isPermaLink="false">${episode.id}</guid>
       <pubDate>${episode.publishDate.toUTCString()}</pubDate>
       <enclosure url="${safeAudioUrl}" type="audio/mpeg" length="${episode.fileSizeInBytes}"/>
@@ -111,7 +114,7 @@ function generateRSSXML(podcastMeta, episodes) {
   <channel>
     <title><![CDATA[${title}]]></title>
     <description><![CDATA[${description}]]></description>
-    <link>${websiteUrl}</link>
+    <link>${baseUrl}</link>
     <language>en-us</language>
     <copyright>© ${new Date().getFullYear()} ${author}</copyright>
     <managingEditor>${email} (${author})</managingEditor>
@@ -124,7 +127,7 @@ function generateRSSXML(podcastMeta, episodes) {
     <image>
       <url>${imageUrl}</url>
       <title><![CDATA[${title}]]></title>
-      <link>${websiteUrl}</link>
+      <link>${baseUrl}</link>
     </image>
     <itunes:image href="${imageUrl}"/>` : ''}
     <itunes:category text="Technology">
