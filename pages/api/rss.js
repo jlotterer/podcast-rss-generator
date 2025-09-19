@@ -96,8 +96,8 @@ function generateRSSXML(podcastMeta, episodes) {
   const { title, description, author, email, websiteUrl, imageUrl } = podcastMeta;
   
   const episodeItems = episodes.map(episode => {
-    // Manually escape ampersands in the URL for XML safety
-    const safeAudioUrl = episode.audioUrl.replace(/&/g, '&amp;');
+    // Use the new proxy URL
+    const safeAudioUrl = `${websiteUrl}/api/play?fileId=${episode.id}`;
 
     return `
     <item>
