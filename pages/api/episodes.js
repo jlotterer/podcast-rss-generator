@@ -21,13 +21,13 @@ export default async function handler(req, res) {
     const audioFiles = response.data.files;
 
     const episodes = audioFiles.map(file => {
-      const downloadUrl = `https://drive.google.com/uc?id=${file.id}&export=download`;
+      const audioUrl = `/api/play?fileId=${file.id}`; // Use the proxy URL
       const title = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
 
       return {
         id: file.id,
         title: title,
-        audioUrl: downloadUrl,
+        audioUrl: audioUrl,
         pubDate: file.createdTime, // The frontend expects 'pubDate'
         fileSize: file.size,
       };
