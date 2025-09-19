@@ -25,20 +25,32 @@ export default function Home() {
     }
   }, []);
 
-  const fetchEpisodes = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/rss');
-      if (response.ok) {
-        // Since we're getting RSS, we'll just indicate success
-        // In a real app, you'd have a separate API endpoint for JSON data
-        setIsAuthorized(true);
+
+    const fetchEpisodes = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('/api/rss');
+        if (response.ok) {
+          // Since we're getting RSS, we'll just indicate success
+          // In a real app, you'd have a separate API endpoint for JSON data
+          setIsAuthorized(true);
+          alert('Successfully fetched RSS feed! Status: ' + response.status);
+        } else {
+          // If the response is not OK, log the status and text
+          const errorText = await response.text();
+          console.error('Failed to fetch RSS feed:', response.status, errorText);
+          alert(`Error fetching RSS feed. Status: ${response.status}. Check the browser console for details.`);
+          setIsAuthorized(false);
+        }
+      } catch (error) {
+        console.error('Failed to fetch episodes:', error);
+        alert('A network error occurred. Check the browser console for details.');
       }
-    } catch (error) {
-      console.error('Failed to fetch episodes:', error);
-    }
-    setIsLoading(false);
-  };
+      setIsLoading(false);
+    };
+  
+    const copyRSSUrl = async () => {
+  // ...existing code...
 
   const copyRSSUrl = async () => {
     try {
