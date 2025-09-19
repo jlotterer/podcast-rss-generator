@@ -42,10 +42,10 @@ export default async function handler(req, res) {
 
     // Determine the base URL for all links in the feed.
     // Use a canonical public URL from environment variables, which is critical for Vercel deployments.
-    // Fallback to the request's host for local development.
-    let baseUrl = process.env.PODCAST_PUBLIC_URL || process.env.PODCAST_WEBSITE || `https://${req.headers.host}`;
+    // Fallback to the request's host, which works for local development.
+    let baseUrl = process.env.PODCAST_PUBLIC_URL || `https://${req.headers.host}`;
     // Clean up trailing slashes from the base URL to prevent double slashes.
-    baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    baseUrl = baseUrl.replace(/\/$/, '');
 
     let imageUrl = process.env.PODCAST_IMAGE || '';
     // If the image URL is a local path (e.g., /api/cover), make it absolute.
@@ -97,7 +97,7 @@ function generateRSSXML(podcastMeta, episodes) {
     return `
     <item>
       <title><![CDATA[${episode.title}]]></title>
-      <description><![CDATA[${episode.description}]]></description>
+      <itunes:summary><![CDATA[${episode.description}]]></itunes:summary>
       <link>${baseUrl}</link>
       <guid isPermaLink="false">${episode.id}</guid>
       <pubDate>${episode.publishDate.toUTCString()}</pubDate>
@@ -113,7 +113,7 @@ function generateRSSXML(podcastMeta, episodes) {
      xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title><![CDATA[${title}]]></title>
-    <description><![CDATA[${description}]]></description>
+    <description><![CDATA[${description.substring(0, 250)}...]]></description>
     <link>${baseUrl}</link>
     <language>en-us</language>
     <copyright>© ${new Date().getFullYear()} ${author}</copyright>
@@ -131,7 +131,7 @@ function generateRSSXML(podcastMeta, episodes) {
     </image>
     <itunes:image href="${imageUrl}"/>` : ''}
     <itunes:category text="Technology">
-      <itunes:category text="Artificial Intelligence"/>
+      <itunes:category text="Tech News"/>
     </itunes:category>
     <itunes:explicit>clean</itunes:explicit>
     <itunes:author>${author}</itunes:author>
