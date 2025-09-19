@@ -1,7 +1,8 @@
 import { google } from 'googleapis';
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
+  // Allow both GET and HEAD requests, reject others
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -70,10 +71,16 @@ export default async function handler(req, res) {
     // Generate RSS XML
     const rssXml = generateRSSXML(podcastMeta, episodes);
     
-    // Set headers for RSS feed and send response
+    // Set headers for RSS feed
     res.setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
     
+    // For a HEAD request, send status 200 and end without a body
+    if (req.method === 'HEAD') {
+      return res.status(200).end();
+    }
+    
+    // For a GET request, send the full XML body
     return res.status(200).send(rssXml);
     
   } catch (error) {
@@ -88,17 +95,22 @@ export default async function handler(req, res) {
 function generateRSSXML(podcastMeta, episodes) {
   const { title, description, author, email, websiteUrl, imageUrl } = podcastMeta;
   
-  const episodeItems = episodes.map(episode => `
+  const episodeItems = episodes.map(episode => {
+    // Manually escape ampersands in the URL for XML safety
+    const safeAudioUrl = episode.audioUrl.replace(/&/g, '&amp;');
+
+    return `
     <item>
       <title><![CDATA[${episode.title}]]></title>
       <description><![CDATA[${episode.description}]]></description>
       <link>${websiteUrl}</link>
       <guid isPermaLink="false">${episode.id}</guid>
       <pubDate>${episode.publishDate.toUTCString()}</pubDate>
-      <enclosure url="${episode.audioUrl}" type="audio/mpeg" length="${episode.fileSizeInBytes}"/>
+      <enclosure url="${safeAudioUrl}" type="audio/mpeg" length="${episode.fileSizeInBytes}"/>
       <itunes:duration>${episode.duration}</itunes:duration>
       <itunes:explicit>clean</itunes:explicit>
-    </item>`).join('');
+    </item>`;
+  }).join('');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" 
