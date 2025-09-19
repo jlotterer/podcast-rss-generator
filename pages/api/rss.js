@@ -40,9 +40,12 @@ export default async function handler(req, res) {
       };
     });
 
-    const websiteUrl = `https://${req.headers.host}`;
+    // Use a canonical public URL from environment variables for the RSS feed.
+    // Fallback to the request's host for local development.
+    const websiteUrl = process.env.PODCAST_PUBLIC_URL || `https://${req.headers.host}`;
+
     let imageUrl = process.env.PODCAST_IMAGE || '';
-    // If the image URL is a local path (e.g., /podcast-cover.png), make it absolute.
+    // If the image URL is a local path (e.g., /api/cover), make it absolute.
     if (imageUrl && imageUrl.startsWith('/')) {
       imageUrl = `${websiteUrl}${imageUrl}`;
     }
