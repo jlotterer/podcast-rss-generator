@@ -1,5 +1,4 @@
-// api/rss.js - Vercel serverless function
-const { google } = require('googleapis');
+import { google } from 'googleapis';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -26,7 +25,6 @@ export default async function handler(req, res) {
 
     const drive = google.drive({ version: 'v3', auth });
     
-    // Get folder ID from query params or environment
     const folderId = req.query.folder || process.env.GOOGLE_DRIVE_FOLDER_ID;
     
     if (!folderId) {
@@ -35,22 +33,17 @@ export default async function handler(req, res) {
 
     // Get all audio files from the specified folder
     const response = await drive.files.list({
-      q: `'${folderId}' in parents and (mimeType='audio/mpeg' or mimeType='audio/mp3' or mimeType='audio/wav' or mimeType='audio/ogg' or name contains '.mp3' or name contains '.wav' or name contains '.m4a')`,
-      fields: 'files(id, name, size, createdTime, modifiedTime, webContentLink)',
+      q: `'${folderId}' in parents and (mimeType contains 'audio/')`,
+      fields: 'files(id, name, size, createdTime)',
       orderBy: 'createdTime desc'
     });
 
     const audioFiles = response.data.files;
     
     // Generate episode data
-    const episodes = audioFiles.map((file, index) => {
-      // Create public download URL
+    const episodes = audioFiles.map((file) => {
       const downloadUrl = `https://drive.google.com/uc?id=${file.id}&export=download`;
-      
-      // Extract title from filename (remove extension)
       const title = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
-      
-      // Generate description from title
       const description = `Episode about ${title.toLowerCase()}`;
       
       return {
@@ -59,12 +52,12 @@ export default async function handler(req, res) {
         description: description,
         audioUrl: downloadUrl,
         publishDate: new Date(file.createdTime),
-        fileSize: file.size ? Math.round(file.size / (1024 * 1024) * 10) / 10 + ' MB' : 'Unknown',
-        duration: '00:00' // You'd need to analyze the audio file to get actual duration
+        fileSizeInBytes: file.size || 0, // Pass the raw size in bytes
+        duration: '00:00' // Placeholder: getting real duration is complex
       };
     });
 
-    // Podcast metadata (you can store this in environment variables or a database)
+    // Podcast metadata from environment variables
     const podcastMeta = {
       title: process.env.PODCAST_TITLE || 'My NotebookLM Podcast',
       description: process.env.PODCAST_DESCRIPTION || 'AI-generated podcasts from my research',
@@ -77,7 +70,7 @@ export default async function handler(req, res) {
     // Generate RSS XML
     const rssXml = generateRSSXML(podcastMeta, episodes);
     
-    // Set headers for RSS feed
+    // Set headers for RSS feed and send response
     res.setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
     
@@ -102,7 +95,7 @@ function generateRSSXML(podcastMeta, episodes) {
       <link>${websiteUrl}</link>
       <guid isPermaLink="false">${episode.id}</guid>
       <pubDate>${episode.publishDate.toUTCString()}</pubDate>
-      <enclosure url="${episode.audioUrl}" type="audio/mpeg" length="0"/>
+      <enclosure url="${episode.audioUrl}" type="audio/mpeg" length="${episode.fileSizeInBytes}"/>
       <itunes:duration>${episode.duration}</itunes:duration>
       <itunes:explicit>clean</itunes:explicit>
     </item>`).join('');
@@ -115,7 +108,7 @@ function generateRSSXML(podcastMeta, episodes) {
     <title><![CDATA[${title}]]></title>
     <description><![CDATA[${description}]]></description>
     <link>${websiteUrl}</link>
-    <language>en</language>
+    <language>en-us</language>
     <copyright>© ${new Date().getFullYear()} ${author}</copyright>
     <managingEditor>${email} (${author})</managingEditor>
     <webMaster>${email} (${author})</webMaster>
