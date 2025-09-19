@@ -40,15 +40,21 @@ export default async function handler(req, res) {
       };
     });
 
+    const websiteUrl = `https://${req.headers.host}`;
+    let imageUrl = process.env.PODCAST_IMAGE || '';
+    // If the image URL is a local path (e.g., /podcast-cover.png), make it absolute.
+    if (imageUrl && imageUrl.startsWith('/')) {
+      imageUrl = `${websiteUrl}${imageUrl}`;
+    }
+
     // Podcast metadata from environment variables
     const podcastMeta = {
       title: process.env.PODCAST_TITLE || 'My NotebookLM Podcast',
       description: process.env.PODCAST_DESCRIPTION || 'AI-generated podcasts from my research',
       author: process.env.PODCAST_AUTHOR || 'Podcast Author',
       email: process.env.PODCAST_EMAIL || 'author@example.com',
-      // It's better to determine the website URL dynamically from the request.
-      websiteUrl: `https://${req.headers.host}`,
-      imageUrl: process.env.PODCAST_IMAGE || ''
+      websiteUrl: websiteUrl,
+      imageUrl: imageUrl,
     };
 
     // Generate RSS XML

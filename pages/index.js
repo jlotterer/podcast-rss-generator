@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { RefreshCw, Upload, Settings, Rss, ExternalLink, Copy, Check, AlertCircle, Play, Pause } from 'lucide-react';
 
 // A simple component for a single episode
@@ -23,7 +24,7 @@ const EpisodeItem = ({ episode, isPlaying, onTogglePlay }) => (
 );
 
 
-export default function Home() {
+export default function Home({ podcastTitle, podcastImage }) {
   const [episodes, setEpisodes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -116,11 +117,16 @@ export default function Home() {
 
         {/* Header */}
         <header className="bg-white rounded-2xl shadow-xl p-8 mb-8 text-center">
+          {podcastImage && (
+            <div className="mb-6 mx-auto w-48 h-48 relative shadow-lg rounded-2xl overflow-hidden">
+              <Image src={podcastImage} alt={`${podcastTitle} cover art`} layout="fill" objectFit="cover" />
+            </div>
+          )}
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            🎙️ Automated Podcast RSS Generator
+            🎙️ {podcastTitle}
           </h1>
           <p className="text-xl text-gray-600 mb-6">
-            Sync with Google Drive • Auto-generate RSS • Deploy everywhere
+            Your personal podcast, powered by Google Drive.
           </p>
           
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
@@ -207,4 +213,17 @@ export default function Home() {
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  // Fetch podcast metadata from environment variables on the server
+  const podcastTitle = process.env.PODCAST_TITLE || 'My Automated Podcast';
+  const podcastImage = process.env.PODCAST_IMAGE || null; // Use null if not set
+
+  return {
+    props: {
+      podcastTitle,
+      podcastImage,
+    },
+  };
 }
