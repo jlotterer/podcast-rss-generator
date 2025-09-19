@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
 
     if (!folderId) {
-      return res.status(500).json({ error: 'Google Drive folder ID is not configured.' });
+      return res.status(500).json({ error: 'Server configuration error: Google Drive folder ID is not set.' });
     }
 
     const response = await drive.files.list({

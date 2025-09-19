@@ -2,7 +2,7 @@ import { drive } from '../../lib/drive';
 
 export default async function handler(req, res) {
   try {
-    if (!drive) {
+    if (!drive) { // Check if the Google Drive client initialized correctly
       return res.status(500).json({ error: 'Google Drive client is not initialized.' });
     }
 
@@ -33,6 +33,10 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error streaming file:', error);
-    res.status(500).json({ error: 'Failed to stream file.' });
+    // Google API errors often have a `code` property.
+    if (error.code === 404) {
+      return res.status(404).json({ error: 'File not found in Google Drive.' });
+    }
+    return res.status(500).json({ error: 'Failed to stream file.', details: error.message });
   }
 }

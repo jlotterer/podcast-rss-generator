@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
     
     if (!folderId) {
-      return res.status(400).json({ error: 'Folder ID required' });
+      return res.status(500).json({ error: 'Server configuration error: Google Drive folder ID is not set.' });
     }
 
     // Get all audio files from the specified folder
