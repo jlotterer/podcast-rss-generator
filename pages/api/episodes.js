@@ -1,6 +1,7 @@
 import { drive } from '../../lib/drive';
+import { withAuth } from '../../lib/auth/middleware';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   try {
     if (!drive) {
       return res.status(500).json({ error: 'Google Drive client is not initialized.' });
@@ -44,3 +45,5 @@ export default async function handler(req, res) {
     });
   }
 }
+
+export default withAuth(handler);

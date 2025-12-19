@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { RefreshCw, Upload, Settings, Rss, Copy, Check, Play, Pause, Loader2, Info, CheckCircle2, XCircle } from 'lucide-react';
+import ProtectedPage from '../components/ProtectedPage';
+import AuthHeader from '../components/AuthHeader';
 
 // A simple component for a single episode
 const EpisodeItem = ({ episode, isPlaying, onTogglePlay }) => (
@@ -103,18 +105,24 @@ export default function Home({ podcastTitle, podcastImage }) {
   const currentAudioSrc = currentlyPlaying?.audioUrl || '';
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 font-sans">
-      <div className="max-w-6xl mx-auto">
-        {/* Audio player element, hidden but functional */}
-        <audio
-            ref={audioRef}
-            src={currentAudioSrc}
-            onEnded={() => setCurrentlyPlaying(null)} // Reset when track finishes
-            key={currentAudioSrc} // Force re-render on src change
-        />
+    <ProtectedPage>
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 font-sans">
+        <div className="max-w-6xl mx-auto">
+          {/* User Auth Header */}
+          <div className="mb-6 flex justify-end">
+            <AuthHeader />
+          </div>
 
-        {/* Header */}
-        <header className="bg-white rounded-2xl shadow-lg p-8 mb-8 text-center border border-gray-200/80">
+          {/* Audio player element, hidden but functional */}
+          <audio
+              ref={audioRef}
+              src={currentAudioSrc}
+              onEnded={() => setCurrentlyPlaying(null)} // Reset when track finishes
+              key={currentAudioSrc} // Force re-render on src change
+          />
+
+          {/* Header */}
+          <header className="bg-white rounded-2xl shadow-lg p-8 mb-8 text-center border border-gray-200/80">
           {podcastImage && (
             <div className="mb-6 mx-auto w-40 h-40 sm:w-48 sm:h-48 relative shadow-md rounded-2xl overflow-hidden">
               <Image src={podcastImage} alt={`${podcastTitle} cover art`} layout="fill" objectFit="cover" />
@@ -243,8 +251,9 @@ export default function Home({ podcastTitle, podcastImage }) {
             </div>
           </div>
         </main>
+        </div>
       </div>
-    </div>
+    </ProtectedPage>
   );
 }
 
