@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma init)",
+      "Bash(node scripts/check-users.js:*)",
+      "Bash(taskkill:*)"
+    ]
+  }
+}

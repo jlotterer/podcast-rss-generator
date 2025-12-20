@@ -1,5 +1,5 @@
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { LogOut, Shield, User, Settings } from 'lucide-react';
+import { LogOut, Shield, User, Settings, UserCog } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AuthHeader() {
@@ -30,13 +30,23 @@ export default function AuthHeader() {
   const isCreator = userRole === 'creator' || isAdmin;
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-3">
+      {(isCreator) && (
+        <Link href="/podcasts" className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+          <Settings className="w-4 h-4" />
+          Podcasts
+        </Link>
+      )}
+
+      <Link href="/settings" className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2">
+        <UserCog className="w-4 h-4" />
+        Settings
+      </Link>
+
       {isAdmin && (
-        <Link href="/admin">
-          <a className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Admin
-          </a>
+        <Link href="/admin" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+          <Settings className="w-4 h-4" />
+          Admin
         </Link>
       )}
 

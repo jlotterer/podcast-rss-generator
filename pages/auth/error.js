@@ -31,16 +31,12 @@ export default function AuthError() {
         </p>
 
         <div className="space-y-3">
-          <Link href="/auth/signin">
-            <a className="block w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-              Try Again
-            </a>
+          <Link href="/auth/signin" className="block w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+            Try Again
           </Link>
 
-          <Link href="/">
-            <a className="block w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
-              Go Home
-            </a>
+          <Link href="/" className="block w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+            Go Home
           </Link>
         </div>
       </div>

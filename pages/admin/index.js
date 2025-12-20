@@ -62,11 +62,9 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
-          <Link href="/">
-            <a className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-colors text-gray-700">
-              <ArrowLeft className="w-4 h-4" />
-              Back to Podcast
-            </a>
+          <Link href="/" className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-colors text-gray-700">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Podcast
           </Link>
         </div>
 

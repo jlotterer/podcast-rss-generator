@@ -1,0 +1,69 @@
+// Prisma Schema for Multi-Tenant Podcast Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - represents platform users
+model User {
+  id                    String       @id @default(cuid())
+  email                 String       @unique
+  name                  String?
+  role                  String       @default("creator") // admin, creator, listener
+  googleDriveFolderId   String?      // User's root Google Drive folder
+  googleAccessToken     String?      @db.Text // For per-user Google Drive access
+  googleRefreshToken    String?      @db.Text
+  googleTokenExpiry     DateTime?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  podcasts              Podcast[]
+  invitationsSent       Invitation[] @relation("InvitedBy")
+
+  @@map("users")
+}
+
+// Podcast model - each user can have multiple podcasts
+model Podcast {
+  id                    String    @id @default(cuid())
+  name                  String
+  description           String?   @db.Text
+  userId                String
+  googleDriveFolderId   String    // Subfolder ID for this podcast
+  coverImage            String?
+  author                String?
+  email                 String?
+  publicUrl             String?
+  isActive              Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("podcasts")
+}
+
+// Invitation model - for inviting new users
+model Invitation {
+  id                    String    @id @default(cuid())
+  email                 String
+  role                  String    @default("creator")
+  token                 String    @unique
+  invitedBy             String
+  acceptedAt            DateTime?
+  expiresAt             DateTime
+  createdAt             DateTime  @default(now())
+
+  inviter               User      @relation("InvitedBy", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([email])
+  @@map("invitations")
+}

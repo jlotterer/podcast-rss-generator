@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import prisma from '../../../lib/prisma';
 
 export const authOptions = {
   providers: [
@@ -21,27 +22,52 @@ export const authOptions = {
     strategy: 'jwt',
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      try {
+        // Upsert user in database on sign-in
+        const dbUser = await upsertUser({
+          email: user.email,
+          name: user.name,
+          googleAccessToken: account.access_token,
+          googleRefreshToken: account.refresh_token,
+          googleTokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : null,
+        });
+
+        // Store database user ID for later use
+        user.dbId = dbUser.id;
+        user.role = dbUser.role;
+        user.googleDriveFolderId = dbUser.googleDriveFolderId;
+
+        return true;
+      } catch (error) {
+        console.error('Error during sign-in:', error);
+        return false;
+      }
+    },
     async jwt({ token, account, user }) {
-      // Persist the OAuth access_token and refresh_token to the token right after signin
+      // On initial sign-in, add user data to token
+      if (user) {
+        token.userId = user.dbId;
+        token.role = user.role;
+        token.googleDriveFolderId = user.googleDriveFolderId;
+      }
+
+      // Persist the OAuth tokens
       if (account) {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
       }
 
-      // Add user role to token on first sign in
-      if (user) {
-        token.role = await getUserRole(user.email);
-        token.userId = user.id;
-      }
-
       return token;
     },
     async session({ session, token }) {
-      // Send properties to the client, like an access_token and user role
+      // Send properties to the client
+      session.user.id = token.userId;
+      session.user.role = token.role;
+      session.user.googleDriveFolderId = token.googleDriveFolderId;
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
-      session.user.role = token.role;
-      session.user.id = token.userId;
+
       return session;
     },
   },
@@ -53,28 +79,46 @@ export const authOptions = {
 
 export default NextAuth(authOptions);
 
-// User role management
-// In production, this should query a database
-async function getUserRole(email) {
-  // Define authorized users and their roles
-  const authorizedUsers = {
-    // Add your admin emails here
-    // 'admin@example.com': 'admin',
-    // 'creator@example.com': 'creator',
-  };
+// Upsert user in database
+async function upsertUser({ email, name, googleAccessToken, googleRefreshToken, googleTokenExpiry }) {
+  // Determine role for new users (check env vars for bootstrapping)
+  const defaultRole = getDefaultRole(email);
 
-  // Check environment variable for additional admin emails
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: {
+      name,
+      googleAccessToken,
+      googleRefreshToken,
+      googleTokenExpiry,
+      updatedAt: new Date(),
+    },
+    create: {
+      email,
+      name,
+      role: defaultRole,
+      googleAccessToken,
+      googleRefreshToken,
+      googleTokenExpiry,
+    },
+  });
+
+  return user;
+}
+
+// Get default role for new users (uses env vars for bootstrapping)
+function getDefaultRole(email) {
   const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
   const creatorEmails = process.env.CREATOR_EMAILS?.split(',').map(e => e.trim()) || [];
 
-  if (adminEmails.includes(email) || authorizedUsers[email] === 'admin') {
+  if (adminEmails.includes(email)) {
     return 'admin';
   }
 
-  if (creatorEmails.includes(email) || authorizedUsers[email] === 'creator') {
+  if (creatorEmails.includes(email)) {
     return 'creator';
   }
 
-  // Default role for authenticated users (read-only listener)
+  // Default role for new users
   return 'listener';
 }
