@@ -5,7 +5,17 @@
       "Bash(npm install:*)",
       "Bash(npx prisma init)",
       "Bash(node scripts/check-users.js:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(npx prisma generate)",
+      "Bash(Get-NetTCPConnection -LocalPort 3001 -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object LocalAddress,LocalPort,State,OwningProcess)",
+      "Bash(Format-Table:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx next build --no-lint)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(git add:*)"
     ]
   }
 }

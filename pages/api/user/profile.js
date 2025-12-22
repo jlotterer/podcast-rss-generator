@@ -33,6 +33,7 @@ async function getProfile(req, res, userId) {
         role: true,
         googleDriveFolderId: true,
         createdAt: true,
+        lastAccessedAt: true,
         updatedAt: true,
         _count: {
           select: { podcasts: true },

@@ -21,13 +21,13 @@ export default async function handler(req, res) {
   }
 }
 
-// List podcasts (admins see all, users see only their own)
+// List podcasts (users see only their own)
 async function listPodcasts(req, res, userId, userRole) {
   try {
-    const where = userRole === 'admin' ? {} : { userId };
-
+    // Always filter by userId - users should only see their own podcasts
+    // Admin panel has a separate endpoint for viewing all podcasts
     const podcasts = await prisma.podcast.findMany({
-      where,
+      where: { userId },
       include: {
         user: {
           select: {

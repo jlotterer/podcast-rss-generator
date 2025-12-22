@@ -65,8 +65,29 @@ export const authOptions = {
       session.user.id = token.userId;
       session.user.role = token.role;
       session.user.googleDriveFolderId = token.googleDriveFolderId;
-      session.accessToken = token.accessToken;
-      session.refreshToken = token.refreshToken;
+
+      // Fetch fresh tokens from database to ensure they're up to date
+      if (token.userId) {
+        try {
+          const user = await prisma.user.findUnique({
+            where: { id: token.userId },
+            select: {
+              googleAccessToken: true,
+              googleRefreshToken: true,
+            },
+          });
+
+          if (user) {
+            session.user.googleAccessToken = user.googleAccessToken;
+            session.user.googleRefreshToken = user.googleRefreshToken;
+          }
+        } catch (error) {
+          console.error('Error fetching user tokens:', error);
+          // Fall back to tokens from JWT if database fetch fails
+          session.user.googleAccessToken = token.accessToken;
+          session.user.googleRefreshToken = token.refreshToken;
+        }
+      }
 
       return session;
     },
@@ -91,6 +112,7 @@ async function upsertUser({ email, name, googleAccessToken, googleRefreshToken, 
       googleAccessToken,
       googleRefreshToken,
       googleTokenExpiry,
+      lastAccessedAt: new Date(),
       updatedAt: new Date(),
     },
     create: {
@@ -100,25 +122,21 @@ async function upsertUser({ email, name, googleAccessToken, googleRefreshToken, 
       googleAccessToken,
       googleRefreshToken,
       googleTokenExpiry,
+      lastAccessedAt: new Date(),
     },
   });
 
   return user;
 }
 
-// Get default role for new users (uses env vars for bootstrapping)
+// Get default role for new users (uses env vars for bootstrapping admins only)
 function getDefaultRole(email) {
   const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
-  const creatorEmails = process.env.CREATOR_EMAILS?.split(',').map(e => e.trim()) || [];
 
   if (adminEmails.includes(email)) {
     return 'admin';
   }
 
-  if (creatorEmails.includes(email)) {
-    return 'creator';
-  }
-
-  // Default role for new users
-  return 'listener';
+  // Default role for all new users is creator
+  return 'creator';
 }

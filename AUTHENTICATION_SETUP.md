@@ -49,11 +49,11 @@ GOOGLE_CLIENT_SECRET=<paste_your_client_secret_here>
 In the same OAuth client configuration in Google Cloud Console:
 
 1. Under **Authorized JavaScript origins**, add:
-   - `http://localhost:3000` (for local development)
+   - `http://localhost:3001` (for local development)
    - Your production URL (e.g., `https://podcast-rss-generator-hazel.vercel.app`)
 
 2. Under **Authorized redirect URIs**, add:
-   - `http://localhost:3000/api/auth/callback/google` (for local development)
+   - `http://localhost:3001/api/auth/callback/google` (for local development)
    - `https://your-production-url.vercel.app/api/auth/callback/google` (for production)
 
 3. Click **Save**
@@ -148,7 +148,7 @@ npm run dev
 
 ### 2. Test Authentication Flow
 
-1. Visit `http://localhost:3000`
+1. Visit `http://localhost:3001`
 2. You should be redirected to the sign-in page
 3. Click "Sign in with Google"
 4. Authorize with your Google account

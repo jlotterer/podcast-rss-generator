@@ -1,11 +1,14 @@
 import { withAdmin } from '../../../lib/auth/middleware';
 import { getUserRole } from '../../../lib/auth/roles';
+import prisma from '../../../lib/prisma';
 
 async function handler(req, res) {
   if (req.method === 'GET') {
     return handleGetUsers(req, res);
   } else if (req.method === 'POST') {
     return handleUpdateUserRole(req, res);
+  } else if (req.method === 'DELETE') {
+    return handleDeleteUser(req, res);
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
@@ -13,17 +16,35 @@ async function handler(req, res) {
 
 async function handleGetUsers(req, res) {
   try {
-    // In a real application, this would query a database
-    // For now, we'll return the users from environment variables
-    const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
-    const creatorEmails = process.env.CREATOR_EMAILS?.split(',').map(e => e.trim()) || [];
+    // Fetch all users from database with podcast counts
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        lastAccessedAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            podcasts: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
-    const users = [
-      ...adminEmails.map(email => ({ email, role: 'admin' })),
-      ...creatorEmails.map(email => ({ email, role: 'creator' })),
-    ];
+    // Transform to include podcast count at top level
+    const usersWithCounts = users.map(user => ({
+      ...user,
+      podcastCount: user._count.podcasts,
+      _count: undefined, // Remove the nested _count object
+    }));
 
-    return res.status(200).json({ users });
+    return res.status(200).json({ users: usersWithCounts });
   } catch (error) {
     console.error('Error fetching users:', error);
     return res.status(500).json({ error: 'Failed to fetch users' });
@@ -32,27 +53,70 @@ async function handleGetUsers(req, res) {
 
 async function handleUpdateUserRole(req, res) {
   try {
-    const { email, role } = req.body;
+    const { userId, role } = req.body;
 
-    if (!email || !role) {
-      return res.status(400).json({ error: 'Email and role are required' });
+    if (!userId || !role) {
+      return res.status(400).json({ error: 'User ID and role are required' });
     }
 
     if (!['admin', 'creator', 'listener'].includes(role)) {
       return res.status(400).json({ error: 'Invalid role' });
     }
 
-    // In a real application, this would update a database
-    // For now, return a message instructing to update environment variables
+    // Update user role in database
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+      },
+    });
+
     return res.status(200).json({
-      message: 'To update user roles, please modify the ADMIN_EMAILS or CREATOR_EMAILS environment variables in .env.local',
-      note: 'In production, implement a proper user database',
-      email,
-      role,
+      success: true,
+      message: 'User role updated successfully',
+      user: updatedUser,
     });
   } catch (error) {
     console.error('Error updating user role:', error);
+
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     return res.status(500).json({ error: 'Failed to update user role' });
+  }
+}
+
+async function handleDeleteUser(req, res) {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    // Delete the user from the database
+    // This will cascade delete their podcasts due to onDelete: Cascade in schema
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(500).json({ error: 'Failed to delete user' });
   }
 }
 

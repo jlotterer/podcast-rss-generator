@@ -134,14 +134,14 @@ Deleted Files:
 
 3. **Configure OAuth Redirect URLs:**
    - In Google Cloud Console OAuth client
-   - Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
+   - Add authorized redirect URI: `http://localhost:3001/api/auth/callback/google`
    - For production, also add: `https://your-domain.vercel.app/api/auth/callback/google`
 
 4. **Test Locally:**
    ```bash
    npm run dev
    ```
-   Visit `http://localhost:3000` and sign in
+   Visit `http://localhost:3001` and sign in
 
 5. **Deploy to Vercel:**
    - Add all environment variables to Vercel project settings

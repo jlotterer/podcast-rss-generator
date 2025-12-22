@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { User, FolderOpen, Save, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { User, Save, Loader2, CheckCircle2, XCircle, BarChart3, Calendar, Clock, HardDrive, RefreshCw, Moon, Sun } from 'lucide-react';
 import ProtectedPage from '../components/ProtectedPage';
-import AuthHeader from '../components/AuthHeader';
+import PageLayout from '../components/PageLayout';
+import { useTheme } from '../components/ThemeProvider';
 
 export default function Settings() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
+  const [reconnecting, setReconnecting] = useState(false);
   const [profile, setProfile] = useState({
     name: '',
     email: '',
     role: '',
-    googleDriveFolderId: '',
     podcastCount: 0,
+    createdAt: null,
+    lastAccessedAt: null,
   });
 
   useEffect(() => {
@@ -34,8 +38,9 @@ export default function Settings() {
           name: data.user.name || '',
           email: data.user.email,
           role: data.user.role,
-          googleDriveFolderId: data.user.googleDriveFolderId || '',
           podcastCount: data.user._count.podcasts,
+          createdAt: data.user.createdAt,
+          lastAccessedAt: data.user.lastAccessedAt,
         });
       }
     } catch (error) {
@@ -57,7 +62,6 @@ export default function Settings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: profile.name,
-          googleDriveFolderId: profile.googleDriveFolderId,
         }),
       });
 
@@ -75,6 +79,24 @@ export default function Settings() {
     }
   };
 
+  const handleReconnectDrive = async () => {
+    setReconnecting(true);
+    setMessage(null);
+
+    try {
+      // Trigger re-authentication with Google
+      const { signIn } = await import('next-auth/react');
+      await signIn('google', {
+        callbackUrl: '/settings',
+        prompt: 'consent', // Force consent screen to get new tokens
+      });
+    } catch (error) {
+      console.error('Error reconnecting Google Drive:', error);
+      setMessage({ type: 'error', text: 'Failed to reconnect Google Drive' });
+      setReconnecting(false);
+    }
+  };
+
   if (loading) {
     return (
       <ProtectedPage>
@@ -87,13 +109,11 @@ export default function Settings() {
 
   return (
     <ProtectedPage>
-      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-6 flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-            <AuthHeader />
-          </div>
+      <PageLayout
+        title="Settings"
+        subtitle="Manage your account and preferences"
+        maxWidth="max-w-4xl"
+      >
 
           {/* Message */}
           {message && (
@@ -112,10 +132,10 @@ export default function Settings() {
           {/* Profile Form */}
           <form onSubmit={handleSubmit}>
             {/* User Information */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8 mb-6">
               <div className="flex items-center gap-3 mb-6">
                 <User className="w-6 h-6 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">User Information</h2>
+                <h2 className="text-xl font-semibold">User Information</h2>
               </div>
 
               <div className="space-y-4">
@@ -169,33 +189,170 @@ export default function Settings() {
               </div>
             </div>
 
-            {/* Google Drive Settings */}
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            {/* Google Drive Integration */}
+            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8 mb-6">
               <div className="flex items-center gap-3 mb-6">
-                <FolderOpen className="w-6 h-6 text-green-600" />
-                <h2 className="text-xl font-semibold text-gray-900">Google Drive Settings</h2>
+                <HardDrive className="w-6 h-6 text-green-600" />
+                <h2 className="text-xl font-semibold">Google Drive Integration</h2>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-gray-600">
+                  Your Google Drive account is connected and used to access podcast audio files and cover art images.
+                </p>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-900 mb-1">
+                        Connected to: {profile.email}
+                      </p>
+                      <p className="text-xs text-blue-700">
+                        You have granted access to browse folders and read files from your Google Drive
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-sm font-medium text-gray-900 mb-2">Need to reconnect?</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    If you're experiencing issues accessing Google Drive files or folders, reconnect your account to refresh the connection.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleReconnectDrive}
+                    disabled={reconnecting}
+                    className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {reconnecting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Reconnecting...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-5 h-5" />
+                        Reconnect Google Drive
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Appearance */}
+            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8 mb-6">
+              <div className="flex items-center gap-3 mb-6">
+                {theme === 'dark' ? (
+                  <Moon className="w-6 h-6 text-indigo-600" />
+                ) : (
+                  <Sun className="w-6 h-6 text-amber-600" />
+                )}
+                <h2 className="text-xl font-semibold">Appearance</h2>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Google Drive Folder ID
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Theme
                   </label>
-                  <input
-                    type="text"
-                    value={profile.googleDriveFolderId}
-                    onChange={(e) => setProfile({ ...profile, googleDriveFolderId: e.target.value })}
-                    placeholder="Enter your Google Drive folder ID"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent font-mono text-sm"
-                  />
-                  <p className="mt-2 text-sm text-gray-600">
-                    This is the root folder where your podcast audio files are stored. Subfolders will become separate podcasts.
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setTheme('light')}
+                      className={`flex-1 px-6 py-4 rounded-xl border-2 transition-all ${
+                        theme === 'light'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-3">
+                        <Sun className={`w-5 h-5 ${theme === 'light' ? 'text-blue-600' : 'text-gray-600'}`} />
+                        <div className="text-left">
+                          <div className={`font-medium ${theme === 'light' ? 'text-blue-900' : 'text-gray-900'}`}>
+                            Light
+                          </div>
+                          <div className="text-xs text-gray-500">Bright and clean</div>
+                        </div>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTheme('dark')}
+                      className={`flex-1 px-6 py-4 rounded-xl border-2 transition-all ${
+                        theme === 'dark'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-3">
+                        <Moon className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-600' : 'text-gray-600'}`} />
+                        <div className="text-left">
+                          <div className={`font-medium ${theme === 'dark' ? 'text-blue-900' : 'text-gray-900'}`}>
+                            Dark
+                          </div>
+                          <div className="text-xs text-gray-500">Easy on the eyes</div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Account Statistics */}
+            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8 mb-6">
+              <div className="flex items-center gap-3 mb-6">
+                <BarChart3 className="w-6 h-6 text-purple-600" />
+                <h2 className="text-xl font-semibold">Account Statistics</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <h3 className="text-sm font-medium text-blue-900">Member Since</h3>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-700">
+                    {profile.createdAt
+                      ? new Date(profile.createdAt).toLocaleDateString('en-US', {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+                      : 'N/A'}
                   </p>
-                  <p className="mt-1 text-sm text-gray-500">
-                    You can find the folder ID in the URL when viewing the folder in Google Drive:
-                    <code className="ml-1 px-1 py-0.5 bg-gray-100 rounded text-xs">
-                      https://drive.google.com/drive/folders/YOUR_FOLDER_ID
-                    </code>
+                  <p className="text-sm text-blue-600 mt-1">
+                    {profile.createdAt
+                      ? `${Math.floor((new Date() - new Date(profile.createdAt)) / (1000 * 60 * 60 * 24))} days ago`
+                      : ''}
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Clock className="w-5 h-5 text-green-600" />
+                    <h3 className="text-sm font-medium text-green-900">Last Active</h3>
+                  </div>
+                  <p className="text-2xl font-bold text-green-700">
+                    {profile.lastAccessedAt
+                      ? new Date(profile.lastAccessedAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+                      : 'Never'}
+                  </p>
+                  <p className="text-sm text-green-600 mt-1">
+                    {profile.lastAccessedAt
+                      ? new Date(profile.lastAccessedAt).toLocaleTimeString('en-US', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true,
+                        })
+                      : ''}
                   </p>
                 </div>
               </div>
@@ -229,8 +386,7 @@ export default function Settings() {
               </button>
             </div>
           </form>
-        </div>
-      </div>
+      </PageLayout>
     </ProtectedPage>
   );
 }

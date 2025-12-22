@@ -19,12 +19,15 @@ model User {
   googleAccessToken     String?      @db.Text // For per-user Google Drive access
   googleRefreshToken    String?      @db.Text
   googleTokenExpiry     DateTime?
+  lastAccessedAt        DateTime?    // Track when user last accessed the site
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
 
   podcasts              Podcast[]
   invitationsSent       Invitation[] @relation("InvitedBy")
 
+  @@index([role])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -47,6 +50,8 @@ model Podcast {
 
   @@index([userId])
   @@index([isActive])
+  @@index([createdAt])
+  @@index([userId, isActive]) // Compound index for filtering by user and active status
   @@map("podcasts")
 }
 

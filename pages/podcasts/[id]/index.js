@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { ArrowLeft, Edit, Loader2, FolderOpen, User, Mail, Calendar, Play, Pause, Rss, Copy, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Edit, Loader2, FolderOpen, User, Mail, Calendar, Play, Pause, Rss, Copy, Check, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProtectedPage from '../../../components/ProtectedPage';
 import AuthHeader from '../../../components/AuthHeader';
 
@@ -35,6 +35,8 @@ export default function PodcastView() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [copied, setCopied] = useState(false);
   const [rssUrl, setRssUrl] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [episodesPerPage] = useState(10);
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -224,16 +226,49 @@ export default function PodcastView() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {episodes.map((episode) => (
-                  <EpisodeItem
-                    key={episode.id}
-                    episode={episode}
-                    isPlaying={currentlyPlaying?.id === episode.id}
-                    onTogglePlay={handleTogglePlay}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="space-y-3">
+                  {episodes
+                    .slice((currentPage - 1) * episodesPerPage, currentPage * episodesPerPage)
+                    .map((episode) => (
+                      <EpisodeItem
+                        key={episode.id}
+                        episode={episode}
+                        isPlaying={currentlyPlaying?.id === episode.id}
+                        onTogglePlay={handleTogglePlay}
+                      />
+                    ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {episodes.length > episodesPerPage && (
+                  <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
+                    <div className="text-sm text-gray-600">
+                      Showing {((currentPage - 1) * episodesPerPage) + 1} to{' '}
+                      {Math.min(currentPage * episodesPerPage, episodes.length)} of{' '}
+                      {episodes.length} episodes
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        Previous
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(Math.ceil(episodes.length / episodesPerPage), prev + 1))}
+                        disabled={currentPage >= Math.ceil(episodes.length / episodesPerPage)}
+                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

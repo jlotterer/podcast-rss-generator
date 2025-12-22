@@ -46,11 +46,11 @@ Still in the same OAuth client page in Google Cloud Console:
 **Add these URLs:**
 
 Under **Authorized JavaScript origins:**
-- `http://localhost:3000`
+- `http://localhost:3001`
 - `https://podcast-rss-generator-hazel.vercel.app`
 
 Under **Authorized redirect URIs:**
-- `http://localhost:3000/api/auth/callback/google`
+- `http://localhost:3001/api/auth/callback/google`
 - `https://podcast-rss-generator-hazel.vercel.app/api/auth/callback/google`
 
 Click **Save**
@@ -63,7 +63,7 @@ Click **Save**
 npm run dev
 ```
 
-1. Open `http://localhost:3000`
+1. Open `http://localhost:3001`
 2. Click "Sign in with Google"
 3. Authorize with your Google account
 4. You should see the podcast homepage with your user info in the top right
@@ -85,7 +85,7 @@ NEXTAUTH_SECRET=<32-character random string from Step 1>
 GOOGLE_CLIENT_SECRET=<client secret from Google Cloud Console>
 
 # ✅ Already set for local development:
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3001
 
 # Optional - add more users:
 CREATOR_EMAILS=creator@example.com,another@example.com
