@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { ArrowLeft, Save, Loader2, CheckCircle2, XCircle, AlertCircle, Image as ImageIcon, FolderOpen } from 'lucide-react';
 import ProtectedPage from '../../../components/ProtectedPage';
-import AuthHeader from '../../../components/AuthHeader';
+import PageLayout from '../../../components/PageLayout';
 import DriveImageBrowser from '../../../components/DriveImageBrowser';
 import DriveFolderBrowser from '../../../components/DriveFolderBrowser';
 import { extractDriveFolderId } from '../../../lib/utils/driveHelpers';
@@ -165,28 +165,28 @@ export default function PodcastEdit() {
   if (loading) {
     return (
       <ProtectedPage>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        </div>
+        <PageLayout>
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+        </PageLayout>
       </ProtectedPage>
     );
   }
 
   return (
     <ProtectedPage>
-      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-6 flex justify-between items-center">
-            <Link
-              href={`/podcasts/${id}`}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Podcast
-            </Link>
-            <AuthHeader />
-          </div>
+      <PageLayout maxWidth="max-w-4xl">
+        {/* Back Link */}
+        <div className="mb-6">
+          <Link
+            href={`/podcasts/${id}`}
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Podcast
+          </Link>
+        </div>
 
           {/* Message */}
           {message && (
@@ -202,9 +202,9 @@ export default function PodcastEdit() {
             </div>
           )}
 
-          {/* Edit Form */}
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Podcast</h1>
+        {/* Edit Form */}
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Podcast</h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -216,7 +216,7 @@ export default function PodcastEdit() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                 />
               </div>
 
@@ -228,7 +228,7 @@ export default function PodcastEdit() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                 />
               </div>
 
@@ -260,20 +260,20 @@ export default function PodcastEdit() {
                         value={formData.coverImage}
                         onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
                         placeholder="https://example.com/podcast-cover.jpg or browse from Drive"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                       />
                       <button
                         type="button"
                         onClick={handleBrowseImages}
                         disabled={!formData.googleDriveFolderId || autoDetectingCover}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Browse images from Drive folder"
+                        className="w-10 h-10 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                       >
                         {autoDetectingCover ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           <FolderOpen className="w-4 h-4" />
                         )}
-                        Browse Drive
                       </button>
                     </div>
                     <p className="mt-1 text-sm text-gray-500">
@@ -294,17 +294,17 @@ export default function PodcastEdit() {
                     value={formData.googleDriveFolderId}
                     onChange={(e) => handleFolderIdChange(e.target.value)}
                     placeholder="https://drive.google.com/drive/folders/1abc... or just the folder ID"
-                    className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm ${
-                      folderIdError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm text-gray-900 ${
+                      folderIdError ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'
                     }`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowFolderBrowser(true)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                    title="Browse your Drive folders"
+                    className="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex-shrink-0"
                   >
                     <FolderOpen className="w-4 h-4" />
-                    Browse Folders
                   </button>
                 </div>
                 {folderIdError ? (
@@ -327,7 +327,7 @@ export default function PodcastEdit() {
                   type="text"
                   value={formData.author}
                   onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                 />
               </div>
 
@@ -339,7 +339,7 @@ export default function PodcastEdit() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                 />
               </div>
 
@@ -382,13 +382,11 @@ export default function PodcastEdit() {
                     </>
                   )}
                 </button>
-              </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
-      </div>
 
-      {/* Drive Folder Browser Modal */}
+        {/* Drive Folder Browser Modal */}
       {showFolderBrowser && (
         <DriveFolderBrowser
           onSelect={handleFolderSelect}
@@ -406,6 +404,7 @@ export default function PodcastEdit() {
           currentImage={formData.coverImage}
         />
       )}
+      </PageLayout>
     </ProtectedPage>
   );
 }

@@ -1,40 +1,41 @@
 import AuthHeader from './AuthHeader';
+import Footer from './Footer';
+import Link from 'next/link';
 
 /**
- * Consistent page layout wrapper with hero section
- * Used across all screens for unified design
+ * Consistent page layout wrapper for authenticated pages
+ * Provides unified header with logo and navigation across all screens
+ * Header is always full width (max-w-7xl) for consistency
+ * Content width can be customized via maxWidth prop
  */
 export default function PageLayout({
-  title,
-  subtitle,
   children,
   maxWidth = "max-w-7xl",
   onCreateClick
 }) {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="bg-card border-b border-border">
-        <div className={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8 py-6`}>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Consistent Header - Always Full Width */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-4xl font-[700] text-primary font-logo">poddio</h1>
-              {title && (
-                <h2 className="text-2xl font-semibold text-foreground mt-2">{title}</h2>
-              )}
-              {subtitle && (
-                <p className="text-muted-foreground mt-1">{subtitle}</p>
-              )}
-            </div>
+            <Link href="/podcasts">
+              <h1 className="text-3xl font-[700] text-blue-600 font-logo cursor-pointer">poddio</h1>
+            </Link>
             <AuthHeader onCreateClick={onCreateClick} />
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
-        {children}
+      {/* Content - Customizable Width */}
+      <div className="flex-1">
+        <div className={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
+          {children}
+        </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

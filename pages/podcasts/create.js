@@ -61,19 +61,20 @@ export default function CreatePodcast() {
 
   return (
     <ProtectedPage>
-      <PageLayout
-        title="Create New Podcast"
-        subtitle="Set up your podcast with Google Drive integration"
-      >
+      <PageLayout>
         <div className="max-w-3xl mx-auto">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold text-gray-900">Create New Podcast</h2>
+            <p className="text-gray-600 mt-1">Set up your podcast with Google Drive integration</p>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Podcast Information Card */}
-            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8">
-              <h3 className="text-xl font-semibold mb-6">Podcast Information</h3>
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Podcast Information</h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Podcast Name *
                   </label>
                   <input
@@ -82,12 +83,12 @@ export default function CreatePodcast() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="My Awesome Podcast"
-                    className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground"
+                    className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Description
                   </label>
                   <textarea
@@ -95,19 +96,19 @@ export default function CreatePodcast() {
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="A brief description of your podcast..."
                     rows="4"
-                    className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground"
+                    className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                   />
                 </div>
               </div>
             </div>
 
             {/* Google Drive Integration Card */}
-            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8">
-              <h3 className="text-xl font-semibold mb-6">Google Drive Integration</h3>
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Google Drive Integration</h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Episode Folder *
                   </label>
                   <div className="flex gap-2">
@@ -116,24 +117,24 @@ export default function CreatePodcast() {
                       value={formData.folderName}
                       readOnly
                       placeholder="Select a folder from Google Drive"
-                      className="flex-1 px-4 py-2 bg-muted border border-input rounded-lg text-foreground cursor-not-allowed"
+                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-600 cursor-not-allowed"
                     />
                     <button
                       type="button"
                       onClick={() => setShowFolderBrowser(true)}
-                      className="px-6 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium transition-colors flex items-center gap-2"
+                      title="Browse your Drive folders"
+                      className="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex-shrink-0"
                     >
                       <FolderOpen className="w-5 h-5" />
-                      Browse
                     </button>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="mt-2 text-sm text-gray-500">
                     Select the Google Drive folder containing your podcast episodes
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Cover Art Image
                   </label>
                   <div className="space-y-2">
@@ -143,16 +144,16 @@ export default function CreatePodcast() {
                         value={formData.coverImage}
                         onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
                         placeholder="https://example.com/cover.jpg or browse from Drive"
-                        className="flex-1 px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground"
+                        className="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                       />
                       <button
                         type="button"
                         onClick={() => setShowImageBrowser(true)}
                         disabled={!formData.googleDriveFolderId}
-                        className="px-6 py-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Browse images from Drive folder"
+                        className="w-10 h-10 flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                       >
                         <ImageIcon className="w-5 h-5" />
-                        Browse
                       </button>
                     </div>
                     {formData.coverImage && (
@@ -160,7 +161,7 @@ export default function CreatePodcast() {
                         <img
                           src={formData.coverImage}
                           alt="Cover preview"
-                          className="w-40 h-40 object-cover rounded-xl border-2 border-border"
+                          className="w-40 h-40 object-cover rounded-xl border-2 border-gray-200"
                         />
                       </div>
                     )}
@@ -174,14 +175,14 @@ export default function CreatePodcast() {
               <button
                 type="button"
                 onClick={() => router.push('/podcasts')}
-                className="flex-1 px-6 py-3 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg font-medium transition-colors"
+                className="flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 rounded-lg font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading || !formData.name || !formData.googleDriveFolderId}
-                className="flex-1 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>

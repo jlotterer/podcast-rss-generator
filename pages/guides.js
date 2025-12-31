@@ -1,22 +1,10 @@
 import { Brain, Youtube, BookOpen, FileText, GraduationCap, Mic, ArrowRight, CheckCircle, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import PublicPageLayout from '../components/PublicPageLayout';
 
 export default function Guides() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Navigation */}
-      <nav className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/">
-              <h1 className="text-3xl font-[700] text-blue-600 font-logo cursor-pointer">poddio</h1>
-            </Link>
-            <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
-              ← Back to Home
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <PublicPageLayout showCTA={true}>
 
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -62,9 +50,29 @@ export default function Guides() {
             <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center">
               <Brain className="w-8 h-8 text-white" />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="text-3xl font-bold text-gray-900">NotebookLM Podcasts</h3>
               <p className="text-gray-600">Turn any content into AI-generated podcast conversations</p>
+            </div>
+            <Link href="/notebooklm-guide" className="hidden md:block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors shadow-md">
+              Full Guide →
+            </Link>
+          </div>
+
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Want to Master NotebookLM Podcasting?</h4>
+                <p className="text-gray-700 mb-3">
+                  Check out our comprehensive guide with proven prompting strategies, content types that work best, and expert tips for creating professional-quality AI podcasts.
+                </p>
+                <Link href="/notebooklm-guide" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold">
+                  Read the Complete NotebookLM Guide <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -429,49 +437,6 @@ export default function Guides() {
         </div>
       </section>
 
-      {/* Footer CTA */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl p-12 text-center shadow-2xl">
-          <h3 className="text-4xl font-bold text-white mb-4">Ready to Get Started?</h3>
-          <p className="text-xl text-blue-100 mb-8">
-            Create your first podcast in minutes with poddio
-          </p>
-          <Link href="/">
-            <button className="px-8 py-4 bg-white hover:bg-gray-100 text-blue-600 text-lg rounded-xl font-semibold transition-colors shadow-lg inline-flex items-center gap-2">
-              Sign Up Free <ArrowRight className="w-5 h-5" />
-            </button>
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
-              <h1 className="text-2xl font-[700] text-blue-600 font-logo mb-2">poddio</h1>
-              <p className="text-gray-600">Podcast publishing made simple</p>
-            </div>
-            <div className="flex gap-8 text-sm">
-              <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Home
-              </Link>
-              <Link href="/guides" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Guides
-              </Link>
-              <a href="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Privacy Policy
-              </a>
-              <a href="/terms" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Terms of Service
-              </a>
-            </div>
-          </div>
-          <div className="text-center mt-8 text-gray-500 text-sm">
-            © {new Date().getFullYear()} poddio. All rights reserved.
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PublicPageLayout>
   );
 }

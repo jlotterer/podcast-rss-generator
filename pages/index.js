@@ -2,6 +2,7 @@ import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Mic, Zap, Cloud, Share2, ArrowRight, CheckCircle2, X, Sparkles, BookOpen, Youtube, FileText, GraduationCap, Brain } from 'lucide-react';
+import PublicPageLayout from '../components/PublicPageLayout';
 
 export default function LandingPage() {
   const { data: session, status } = useSession();
@@ -21,11 +22,11 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <PublicPageLayout showCTA={false}>
       {/* Beta Banner */}
       {showBanner && (
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 relative">
-          <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm sm:text-base">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 relative -mt-8 -mx-4 sm:-mx-6 lg:-mx-8 mb-8">
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm sm:text-base px-4">
             <Sparkles className="w-4 h-4 flex-shrink-0" />
             <p className="text-center">
               <span className="font-semibold">Early Access:</span> We're actively building new features. Join us as we shape the future of podcast publishing!
@@ -40,29 +41,6 @@ export default function LandingPage() {
           </div>
         </div>
       )}
-
-      {/* Navigation */}
-      <nav className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-[700] text-blue-600 font-logo">poddio</h1>
-            <div className="flex gap-3">
-              <button
-                onClick={() => signIn('google')}
-                className="px-5 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => signIn('google')}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
-              >
-                Get Started
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
@@ -216,8 +194,8 @@ export default function LandingPage() {
             <p className="text-gray-700 mb-4">
               Turn any research, documents, or ideas into AI-generated podcast conversations with Google NotebookLM. Save to Drive, auto-publish to your feed.
             </p>
-            <a href="/guides#notebooklm" className="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center gap-1">
-              Learn how <ArrowRight className="w-4 h-4" />
+            <a href="/notebooklm-guide" className="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center gap-1">
+              Complete Guide <ArrowRight className="w-4 h-4" />
             </a>
           </div>
 
@@ -308,35 +286,6 @@ export default function LandingPage() {
           </button>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
-              <h1 className="text-2xl font-[700] text-blue-600 font-logo mb-2">poddio</h1>
-              <p className="text-gray-600">Podcast publishing made simple</p>
-            </div>
-            <div className="flex gap-8 text-sm">
-              <a href="/guides" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Guides
-              </a>
-              <a href="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Privacy Policy
-              </a>
-              <a href="/terms" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Terms of Service
-              </a>
-              <a href="/contact" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Contact
-              </a>
-            </div>
-          </div>
-          <div className="text-center mt-8 text-gray-500 text-sm">
-            © {new Date().getFullYear()} poddio. All rights reserved.
-          </div>
-        </div>
-      </footer>
-    </div>
+    </PublicPageLayout>
   );
 }

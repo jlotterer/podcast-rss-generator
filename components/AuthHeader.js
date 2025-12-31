@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
-import { LogOut, Shield, User, Settings, UserCog, ChevronDown, Podcast as PodcastIcon, Plus } from 'lucide-react';
+import { LogOut, Shield, User, Settings, UserCog, ChevronDown, Podcast as PodcastIcon, Plus, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AuthHeader({ onCreateClick }) {
@@ -53,6 +53,14 @@ export default function AuthHeader({ onCreateClick }) {
       )}
 
       <Link
+        href="/guides"
+        className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+        title="How-To Guides"
+      >
+        <BookOpen className="w-5 h-5 text-gray-700" />
+      </Link>
+
+      <Link
         href="/settings"
         className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
         title="Settings"
@@ -101,6 +109,15 @@ export default function AuthHeader({ onCreateClick }) {
               </div>
 
               <div className="py-1">
+                <Link
+                  href="/guides"
+                  onClick={() => setShowDropdown(false)}
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  How-To Guides
+                </Link>
+
                 <Link
                   href="/settings"
                   onClick={() => setShowDropdown(false)}

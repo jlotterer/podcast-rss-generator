@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Shield, Users, Settings, ArrowLeft, CheckCircle2, XCircle, Info, Trash2, Podcast, Edit, User, Calendar, FolderOpen } from 'lucide-react';
+import ProtectedPage from '../../components/ProtectedPage';
+import PageLayout from '../../components/PageLayout';
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -183,9 +185,13 @@ export default function AdminDashboard() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <ProtectedPage>
+        <PageLayout>
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        </PageLayout>
+      </ProtectedPage>
     );
   }
 
@@ -194,22 +200,27 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
+    <ProtectedPage>
+      <PageLayout>
+        {/* Back Link */}
         <div className="mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-colors text-gray-700">
-            <ArrowLeft className="w-4 h-4" />
+          <Link
+            href="/podcasts"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
             Back to Podcasts
           </Link>
         </div>
 
-        <header className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-200">
+        {/* Page Header */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                 <Shield className="w-8 h-8 text-purple-600" />
                 Admin Dashboard
-              </h1>
+              </h2>
               <p className="text-gray-600 mt-2">
                 Manage users and platform content
               </p>
@@ -219,7 +230,7 @@ export default function AdminDashboard() {
               <p className="font-medium text-gray-900">{session.user.email}</p>
             </div>
           </div>
-        </header>
+        </div>
 
         {/* Tab Navigation */}
         <div className="bg-white rounded-t-2xl shadow-lg border border-gray-200 border-b-0">
@@ -453,7 +464,7 @@ export default function AdminDashboard() {
             </>
           )}
         </div>
-      </div>
-    </div>
+      </PageLayout>
+    </ProtectedPage>
   );
 }

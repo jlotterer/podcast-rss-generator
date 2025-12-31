@@ -1,15 +1,7 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../auth/[...nextauth]';
 import { google } from 'googleapis';
 import prisma from '../../../../lib/prisma';
 
 export default async function handler(req, res) {
-  const session = await getServerSession(req, res, authOptions);
-
-  if (!session) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   const { id, fileId } = req.query;
 
   if (!fileId) {
@@ -34,9 +26,9 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Podcast not found' });
     }
 
-    // Check permissions
-    if (session.user.role !== 'admin' && podcast.userId !== session.user.id) {
-      return res.status(403).json({ error: 'Forbidden' });
+    // Check if podcast is active
+    if (!podcast.isActive) {
+      return res.status(404).json({ error: 'Podcast is not active' });
     }
 
     // Create Google Drive client with user's OAuth tokens

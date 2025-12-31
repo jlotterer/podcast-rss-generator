@@ -109,13 +109,13 @@ export default function Settings() {
 
   return (
     <ProtectedPage>
-      <PageLayout
-        title="Settings"
-        subtitle="Manage your account and preferences"
-        maxWidth="max-w-4xl"
-      >
+      <PageLayout>
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">Settings</h2>
+          <p className="text-gray-600 mt-1">Manage your account and preferences</p>
+        </div>
 
-          {/* Message */}
+        {/* Message */}
           {message && (
             <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
               message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
@@ -132,7 +132,7 @@ export default function Settings() {
           {/* Profile Form */}
           <form onSubmit={handleSubmit}>
             {/* User Information */}
-            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8 mb-6">
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
               <div className="flex items-center gap-3 mb-6">
                 <User className="w-6 h-6 text-blue-600" />
                 <h2 className="text-xl font-semibold">User Information</h2>
@@ -161,7 +161,7 @@ export default function Settings() {
                     value={profile.name}
                     onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                     placeholder="Enter your display name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                   />
                 </div>
 
@@ -190,7 +190,7 @@ export default function Settings() {
             </div>
 
             {/* Google Drive Integration */}
-            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8 mb-6">
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
               <div className="flex items-center gap-3 mb-6">
                 <HardDrive className="w-6 h-6 text-green-600" />
                 <h2 className="text-xl font-semibold">Google Drive Integration</h2>
@@ -243,7 +243,7 @@ export default function Settings() {
             </div>
 
             {/* Appearance */}
-            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8 mb-6">
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
               <div className="flex items-center gap-3 mb-6">
                 {theme === 'dark' ? (
                   <Moon className="w-6 h-6 text-indigo-600" />
@@ -303,7 +303,7 @@ export default function Settings() {
             </div>
 
             {/* Account Statistics */}
-            <div className="bg-card text-card-foreground rounded-2xl shadow-lg p-8 mb-6">
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
               <div className="flex items-center gap-3 mb-6">
                 <BarChart3 className="w-6 h-6 text-purple-600" />
                 <h2 className="text-xl font-semibold">Account Statistics</h2>

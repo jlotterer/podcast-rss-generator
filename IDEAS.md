@@ -10,6 +10,22 @@ This document is a backlog of ideas - not fully articulated yet.  The content in
 4. ✅ Replace the edit button with three dots menu
 5. ✅ Make sure screen width is consistent across all pages
 6. ✅ Fix the colors of all fields to match the theme
+7. ✅ **Unified Header System** - All authenticated pages use consistent PageLayout component
+8. ✅ **Icon-Only Navigation** - Compact 40x40px buttons for mobile-friendly interface
+9. ✅ **Browse Buttons Simplified** - "Browse Drive" and "Browse Folders" now icon-only with tooltips
+10. ✅ **NotebookLM Master Guide** - Comprehensive `/notebooklm-guide` page with prompting strategies
+11. ✅ **Guides Navigation** - Added Guides access to AuthHeader (icon + dropdown menu)
+12. ✅ **Input Field Fixes** - All forms now use explicit `bg-white` and `text-gray-900` for consistency
+
+## UI Changes
+1. Podcast Card
+- remove the folder
+- fix the "Episodes: View details" - let's just change this to "Episodes: <number of episodes>" without a link to anything, just a count of episodes.
+
+2. Podcast page - let's add an audio player with next, previous, fast forward (30 seconds), reverse (10 seconds), play and pause.
+
+
+
 
 ## High Priority - Content & Marketing
 

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { ArrowLeft, Edit, Loader2, FolderOpen, User, Mail, Calendar, Play, Pause, Rss, Copy, Check, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProtectedPage from '../../../components/ProtectedPage';
-import AuthHeader from '../../../components/AuthHeader';
+import PageLayout from '../../../components/PageLayout';
 
 const EpisodeItem = ({ episode, isPlaying, onTogglePlay }) => (
   <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200/80 hover:bg-gray-50 transition-all duration-200 ease-in-out">
@@ -114,9 +114,11 @@ export default function PodcastView() {
   if (loading) {
     return (
       <ProtectedPage>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        </div>
+        <PageLayout>
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+        </PageLayout>
       </ProtectedPage>
     );
   }
@@ -129,19 +131,17 @@ export default function PodcastView() {
 
   return (
     <ProtectedPage>
-      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-6 flex justify-between items-center">
-            <Link
-              href="/podcasts"
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Podcasts
-            </Link>
-            <AuthHeader />
-          </div>
+      <PageLayout maxWidth="max-w-6xl">
+        {/* Back Link */}
+        <div className="mb-6">
+          <Link
+            href="/podcasts"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Podcasts
+          </Link>
+        </div>
 
           {/* Audio player element, hidden but functional */}
           <audio
@@ -271,8 +271,7 @@ export default function PodcastView() {
               </>
             )}
           </div>
-        </div>
-      </div>
+      </PageLayout>
     </ProtectedPage>
   );
 }

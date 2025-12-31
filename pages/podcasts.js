@@ -25,6 +25,7 @@ export default function Podcasts() {
   const [loading, setLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [episodeCounts, setEpisodeCounts] = useState({});
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.id) {
@@ -46,6 +47,11 @@ export default function Podcasts() {
         const data = await res.json();
         console.log('Podcasts data:', data);
         setPodcasts(data.podcasts);
+
+        // Fetch episode counts for each podcast
+        data.podcasts.forEach(podcast => {
+          fetchEpisodeCount(podcast.id);
+        });
       } else {
         const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
         console.error('Failed to fetch podcasts:', res.status, errorData);
@@ -54,6 +60,21 @@ export default function Podcasts() {
       console.error('Error fetching podcasts:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchEpisodeCount = async (podcastId) => {
+    try {
+      const res = await fetch(`/api/podcasts/${podcastId}/episodes`);
+      if (res.ok) {
+        const data = await res.json();
+        setEpisodeCounts(prev => ({
+          ...prev,
+          [podcastId]: data.episodes.length
+        }));
+      }
+    } catch (error) {
+      console.error(`Error fetching episodes for podcast ${podcastId}:`, error);
     }
   };
 
@@ -88,10 +109,12 @@ export default function Podcasts() {
 
   return (
     <ProtectedPage>
-      <PageLayout
-        subtitle="Manage your podcast collection"
-        onCreateClick={() => router.push('/podcasts/create')}
-      >
+      <PageLayout onCreateClick={() => router.push('/podcasts/create')}>
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">My Podcasts</h2>
+          <p className="text-gray-600 mt-1">Manage your podcast collection</p>
+        </div>
+
         {/* Podcasts List */}
         {loading ? (
           <div className="space-y-4">
@@ -232,7 +255,9 @@ export default function Podcasts() {
                         <div className="flex items-center gap-2 text-gray-700">
                           <PodcastIcon className="w-4 h-4 text-gray-500" />
                           <span className="font-medium">Episodes:</span>
-                          <span className="text-gray-500">View details</span>
+                          <span className="text-gray-900">
+                            {episodeCounts[podcast.id] !== undefined ? episodeCounts[podcast.id] : '...'}
+                          </span>
                         </div>
                       </div>
                     </div>
